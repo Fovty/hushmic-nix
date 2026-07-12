@@ -20,16 +20,16 @@ let
 in
 rustPlatform.buildRustPackage rec {
   pname = "hushmic";
-  version = "0.1.4";
+  version = "0.2.0";
 
   src = fetchFromGitHub {
     owner = "Fovty";
     repo = "hushmic";
     tag = "v${version}";
-    hash = "sha256-Tc3qg74PmsNNKLvvM2UGP6XLLVMBxo/uplwm2L/Cai4=";
+    hash = "sha256-lkEjGdcAPsg9tRnh/RxDoiOww3eQPdey22QbCXmuA00=";
   };
 
-  cargoHash = "sha256-zYfAh8O4o/pVIMnbKnE3NtZecQI+bCNZVTZ7dyio5og=";
+  cargoHash = "sha256-P5nxiItJ8cR/JQJTnEEVuPDtQ2l4+ZEnaG2mi0bdwP4=";
 
   nativeBuildInputs = [ makeWrapper ];
 
