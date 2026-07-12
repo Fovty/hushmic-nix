@@ -13,17 +13,21 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@v20
-      - uses: DeterminateSystems/magic-nix-cache-action@v13
+      - uses: actions/checkout@v6
+      - uses: DeterminateSystems/nix-installer-action@v22
+      - uses: DeterminateSystems/magic-nix-cache-action@v14
+        with:
+          use-flakehub: false
+          use-gha-cache: true
       - name: Update package and flake inputs
         run: |
           nix flake update
           nix run nixpkgs#nix-update -- hushmic --flake
       - name: Verify package
         run: nix build .#hushmic
-      - uses: peter-evans/create-pull-request@v7
+      - uses: peter-evans/create-pull-request@v8
         with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN || github.token }}
           branch: automation/update-hushmic
           delete-branch: true
           commit-message: "chore: update HushMic"
