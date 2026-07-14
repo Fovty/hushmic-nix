@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   update:
@@ -19,17 +18,16 @@ jobs:
         with:
           use-flakehub: false
           use-gha-cache: true
-      - name: Update package and flake inputs
+      - name: Update, verify, and commit
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           nix flake update
           nix run nixpkgs#nix-update -- hushmic --flake
-      - name: Verify package
-        run: nix build .#hushmic
-      - uses: peter-evans/create-pull-request@v8
-        with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN || github.token }}
-          branch: automation/update-hushmic
-          delete-branch: true
-          commit-message: "chore: update HushMic"
-          title: "chore: update HushMic"
-          body: "Automated update of HushMic and the pinned flake inputs."
+          nix build .#hushmic
+          if git diff --quiet; then
+            echo "Already up to date."
+          else
+            git commit -am "chore: update HushMic and flake inputs"
+            git push
+          fi

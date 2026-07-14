@@ -1,17 +1,24 @@
 # hushmic-nix
 
-A Nix flake for [HushMic](https://github.com/Fovty/hushmic), a real-time
-microphone noise suppressor for PipeWire.
+Nix flake for [HushMic](https://github.com/Fovty/hushmic) — real-time microphone
+noise suppression as a system-wide PipeWire virtual mic.
 
-```console
-nix run github:crowquillx/hushmic-nix
+## Run
+
+```sh
+nix run github:Fovty/hushmic-nix -- --tray
 ```
 
-Or add the flake as an input and use `inputs.hushmic-nix.packages.${system}.default`.
-HushMic requires a running PipeWire/WirePlumber session and currently supports
-only x86_64 Linux, matching upstream.
+## Install into your profile
 
-The scheduled GitHub Actions updater checks daily for a new upstream release,
-refreshes the source and Cargo hashes with `nix-update`, verifies the build, and
-opens (or refreshes) an update pull request. It can also be started manually
-from the Actions tab.
+```sh
+nix profile install github:Fovty/hushmic-nix
+```
+
+> Needs flakes enabled — if Nix complains, prepend
+> `--extra-experimental-features 'nix-command flakes'`.
+
+Builds HushMic from source (required on NixOS, where the prebuilt binaries won't
+run) and wires up the LADSPA plugin, the DPDFNet models, and the ONNX Runtime.
+The flake tracks upstream releases automatically. Licensed MIT OR Apache-2.0,
+matching upstream.
