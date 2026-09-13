@@ -36,16 +36,16 @@ let
 in
 rustPlatform.buildRustPackage rec {
   pname = "hushmic";
-  version = "0.7.1";
+  version = "0.8.0";
 
   src = fetchFromGitHub {
     owner = "Fovty";
     repo = "hushmic";
     tag = "v${version}";
-    hash = "sha256-nao0QdXB5j0vlB+eNGTfrMjvyGqvUQQ+w8p5XxKJwnk=";
+    hash = "sha256-bUcNvGbcm3jR7qF6JcAdN4maThbpWrJvELtV7NRaQX4=";
   };
 
-  cargoHash = "sha256-wpS40SyWQl7NE0aH1UPXIFyzVuM7NluAyiJdOHk4SM8=";
+  cargoHash = "sha256-KvVbFYdsU1b1Ls5S51GoKNJ87RoA98X/jbrjaaqoqjA=";
 
   nativeBuildInputs = [ makeWrapper patchelf pkg-config ];
   buildInputs = [ onnxruntime ] ++ guiLibs;
