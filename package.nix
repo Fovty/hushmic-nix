@@ -23,6 +23,26 @@ let
     url = "https://huggingface.co/Ceva-IP/DPDFNet/resolve/main/onnx/dpdfnet2_48khz_hr.onnx?download=true";
     hash = "sha256-fwV1pc7Auk/9j4vWV+BtAH5MzdlV12+quSK50ykdwUs=";
   };
+  # Native engine weights (HushMic >= 0.10): upstream, from the DPDFNet
+  # commit the C runtime in hushmic-denoiser is vendored from, with the copy
+  # attached to the HushMic v0.10.0 release as a fallback. Pinned by hash,
+  # so nix-update never has to touch them.
+  dpdfnetNative = "https://raw.githubusercontent.com/ceva-ip/DPDFNet/6a5dbd3ea5dbea88c30a2be8e7c689b5eb26b533/native_inference/artifacts/v1";
+  weightsMirror = "https://github.com/Fovty/hushmic/releases/download/v0.10.0";
+  weights8 = fetchurl {
+    urls = [
+      "${dpdfnetNative}/dpdfnet8_48khz_hr/weights.f32"
+      "${weightsMirror}/dpdfnet8_48khz_hr.weights.f32"
+    ];
+    hash = "sha256-Wlu2eoYZCQxU3CeTU2/oE/44EjsjbURfNDOq/jB1Up0=";
+  };
+  weights2 = fetchurl {
+    urls = [
+      "${dpdfnetNative}/dpdfnet2_48khz_hr/weights.f32"
+      "${weightsMirror}/dpdfnet2_48khz_hr.weights.f32"
+    ];
+    hash = "sha256-y3JIuPzL/3sy8lTsLtAGHmBFFLLM2Y2ZfNCBqHZCTns=";
+  };
   guiLibs = [
     libGL
     libxkbcommon
@@ -65,6 +85,8 @@ rustPlatform.buildRustPackage rec {
     rm -f "$out/share/hushmic/models/dpdfnet8_48khz_hr.onnx"
     install -Dm644 ${model8} "$out/share/hushmic/models/dpdfnet8_48khz_hr.onnx"
     install -Dm644 ${model2} "$out/share/hushmic/models/dpdfnet2_48khz_hr.onnx"
+    install -Dm644 ${weights8} "$out/share/hushmic/models/dpdfnet8_48khz_hr.weights.f32"
+    install -Dm644 ${weights2} "$out/share/hushmic/models/dpdfnet2_48khz_hr.weights.f32"
     install -Dm644 packaging/hushmic.desktop "$out/share/applications/hushmic.desktop"
     install -Dm644 packaging/hushmic-256.png "$out/share/icons/hicolor/256x256/apps/hushmic.png"
 
