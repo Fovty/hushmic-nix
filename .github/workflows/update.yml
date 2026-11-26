@@ -23,7 +23,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           nix flake update
-          nix run nixpkgs#nix-update -- hushmic --flake
+          # nix-update 1.17.0, pinned by commit: with Nix 2.35 `nix flake
+          # metadata` no longer copies the flake to the store, and the 1.16.0
+          # in nixpkgs then fails ("opening file /nix/store/...-source").
+          # Back to nixpkgs#nix-update once nixpkgs has 1.17 or newer.
+          nix run github:Mic92/nix-update/cfd5a600f21407748daa7b38cd5e370d868ce10e -- hushmic --flake
           nix build .#hushmic
           if git diff --quiet; then
             echo "Already up to date."
