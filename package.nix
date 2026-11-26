@@ -7,8 +7,6 @@
   patchelf,
   pkg-config,
   onnxruntime,
-  libopus,
-  ffmpeg-headless,
   pipewire,
   libGL,
   libxkbcommon,
@@ -58,35 +56,19 @@ let
 in
 rustPlatform.buildRustPackage rec {
   pname = "hushmic";
-  version = "1.0.0";
+  version = "0.11.0";
 
   src = fetchFromGitHub {
     owner = "Fovty";
     repo = "hushmic";
     tag = "v${version}";
-    hash = "sha256-5XbqvGlUUbIWLXM4iaO6ZOh07KTLumtQeeZnopZvFTs=";
+    hash = "sha256-DDeOGP/+jIEopu5Jv3uipgK8v1PKwTa5/+j25oTAbDE=";
   };
 
-  cargoHash = "sha256-kUPWjyfhGbtwrC86mpy2C7MToDrRAm7L5oYzzVCmQQc=";
+  cargoHash = "sha256-Rk4r6kSzMpSYGFK1I1xLxB4WORya9YS9d3kEE2+aed8=";
 
   nativeBuildInputs = [ makeWrapper patchelf pkg-config ];
-  buildInputs = [ onnxruntime libopus ] ++ guiLibs;
-
-  # Opus recordings (Ogg, WebM, MKV) decode through libopus, as in every
-  # other package of HushMic >= 1.0.
-  buildFeatures = [ "hushmic/opus" ];
-
-  # The unit tests only. The integration tests under tests/ put fake
-  # PipeWire tools (shell scripts) on a PATH of their own that ends in
-  # /usr/bin:/bin, where the build sandbox has no sleep or mv; they run on
-  # real distributions in HushMic's own CI.
-  cargoTestFlags = [ "--lib" "--bins" ];
-  # Three of them read WAV fixtures that the v1.0.0 source does not carry.
-  checkFlags = [
-    "--skip=files::cli::tests::clean_one_checks_the_space_once_the_file_is_open"
-    "--skip=files::gather::tests::a_folder_gives_its_recordings"
-    "--skip=files::player::tests::the_restart_players_stretches_meet_with_a_fade"
-  ];
+  buildInputs = [ onnxruntime ] ++ guiLibs;
 
   HUSHMIC_BUILD_MODEL = "${placeholder "out"}/share/hushmic/models/dpdfnet8_48khz_hr.onnx";
   HUSHMIC_BUILD_DYLIB = "${onnxruntime}/lib/libonnxruntime.so";
@@ -106,31 +88,20 @@ rustPlatform.buildRustPackage rec {
     install -Dm644 ${weights8} "$out/share/hushmic/models/dpdfnet8_48khz_hr.weights.f32"
     install -Dm644 ${weights2} "$out/share/hushmic/models/dpdfnet2_48khz_hr.weights.f32"
     install -Dm644 packaging/hushmic.desktop "$out/share/applications/hushmic.desktop"
-    # "Open with > Clean with HushMic" for recordings (HushMic >= 1.0).
-    install -Dm644 packaging/hushmic-clean.desktop "$out/share/applications/hushmic-clean.desktop"
     install -Dm644 packaging/hushmic-256.png "$out/share/icons/hicolor/256x256/apps/hushmic.png"
 
     # Branded tray STATUS icons: the SNI tray requests these by theme name
     # (hushmic-tray / -off / -error) in the hicolor "status" context. Without
     # them the tray falls back to the app logo and never switches state.
     for size in 16x16 22x22 24x24 32x32 48x48 64x64 128x128 256x256; do
-      for icon in hushmic-tray hushmic-tray-off hushmic-tray-bypass hushmic-tray-mute hushmic-tray-error; do
+      for icon in hushmic-tray hushmic-tray-off hushmic-tray-error; do
         install -Dm644 "packaging/tray/hicolor/$size/status/$icon.png" \
           "$out/share/icons/hicolor/$size/status/$icon.png"
       done
     done
 
-    # The monochrome set KDE and GNOME recolor to the panel.
-    for dir in 16x16 16x16@2 22x22 22x22@2 24x24 24x24@2 scalable; do
-      for icon in packaging/tray/hicolor/$dir/status/hushmic-mono-*-symbolic.svg \
-                  packaging/tray/hicolor/$dir/status/hushmic-mono-symbolic.svg; do
-        install -Dm644 "$icon" "$out/share/icons/hicolor/$dir/status/$(basename "$icon")"
-      done
-    done
-
     wrapProgram "$out/bin/hushmic" \
       --prefix PATH : ${lib.makeBinPath [ pipewire ]} \
-      --suffix PATH : ${lib.makeBinPath [ ffmpeg-headless ]} \
       --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath guiLibs} \
       --set HUSHMIC_PLUGIN_SO "$out/lib/ladspa/libdpdfnet_ladspa.so" \
       --set HUSHMIC_MODEL_DIR "$out/share/hushmic/models" \
